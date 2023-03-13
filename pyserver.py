@@ -15,7 +15,7 @@ def get_public_ip():
 
 
 pathToDataTxt = "DICT.txt"
-ip_address = "78.108.218.126"
+ip_address = "0.0.0.0"
 server_address = (ip_address, 25560)
 
 # Initialize the dictionary from the file
