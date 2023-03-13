@@ -1,9 +1,22 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse, parse_qs
+import requests
+
+def get_public_ip():
+    url = "https://api.ipify.org"
+    try:
+        response = requests.get(url)
+        ip_address = response.text
+        print(ip_address)
+        return ip_address
+    except:
+        return None
+
 
 pathToDataTxt = "DICT.txt"
-server_address = ('127.0.0.1', 8080)
+ip_address = get_public_ip()
+server_address = (ip_address, 25560)
 
 # Initialize the dictionary from the file
 pos_dict = {}
