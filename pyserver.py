@@ -1,8 +1,14 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse, parse_qs
+import platform
+URL = '0.0.0.0'
+is_server = platform.system() == "Linux"
 
-server_address = ('0.0.0.0', 25560)
+if not is_server:
+  URL = 'localhost'
+server_address = (URL, 25560)
+
 
 class RequestHandler(BaseHTTPRequestHandler):
 
@@ -16,15 +22,24 @@ class RequestHandler(BaseHTTPRequestHandler):
     "quat_y",
     "quat_z",
     "quat_w",
-    "tgt_state"
+    "tgt_state",
+    "tgt_ready",
+    "tgt_seeker",
+    "tgt_collected",
+    "tgt_collectedtime",
+    "tgt_color",
+    "tgt_username"
   }
 
   def send_response_bad_request_400(self):
-    self.send_response(400)
-    self.send_header('Content-type', 'application/json')
-    self.end_headers()
-    self.wfile.write(bytes("400 Bad Request", "UTF-8"))
-    self.wfile.flush()
+      self.send_response(400)
+      self.send_header('Content-type', 'application/json')
+      self.end_headers()
+      self.wfile.write(bytes("400 Bad Request", "UTF-8"))
+      self.wfile.flush()
+      
+      # Print the URL that caused a 400 status code
+      print("\nURL causing 400 Bad Request: ", self.path, "\n")
 
   def send_response_not_found_404(self):
     self.send_response(404)
