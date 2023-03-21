@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import time
+from time import sleep
 import threading
 from enum import Enum
 from urllib.parse import urlparse, parse_qs
@@ -200,6 +201,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 def game_loop():
   last_state_change_time = time.time()  # seconds
   while True:
+    sleep(0.01)
+
     # collect some info
     first_player_start = False
     total_players = 0
@@ -295,9 +298,8 @@ def run():
 
     # Server settings
     with HTTPServer(server_address, RequestHandler) as httpd:
-      print('Server running at ' + server_address [0])
+      print('Server running at ' + server_address[0])
       server_thread = threading.Thread(target=httpd.serve_forever())
-      # server_thread.daemon = True
       server_thread.start()
 
 if __name__ == '__main__':
