@@ -4,8 +4,14 @@ import time
 import threading
 from enum import Enum
 from urllib.parse import urlparse, parse_qs
+import platform
 
-server_address = ('127.0.0.1', 8080)
+URL = '0.0.0.0'
+is_server = platform.system() == "Linux"
+
+if not is_server:
+  URL = 'localhost'
+server_address = (URL, 25560)
 
 class MpGameRole(Enum):
   LOBBY = 0
@@ -284,13 +290,15 @@ def game_loop():
 def run():
     print('Starting server...')
 
-#     game_thread = threading.Thread(target=game_loop)
-#     game_thread.start()
+    game_thread = threading.Thread(target=game_loop)
+    game_thread.start()
 
     # Server settings
     with HTTPServer(server_address, RequestHandler) as httpd:
       print('Server running at ' + server_address [0])
-      httpd.serve_forever()
+      server_thread = threading.Thread(target=httpd.serve_forever())
+      # server_thread.daemon = True
+      server_thread.start()
 
 if __name__ == '__main__':
     run()
