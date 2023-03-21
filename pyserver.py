@@ -291,7 +291,7 @@ def run():
     with HTTPServer(server_address, RequestHandler) as httpd:
       print('Server running at ' + server_address [0])
       server_thread = threading.Thread(target=httpd.serve_forever())
-      # server_thread.daemon = True
+      server_thread.daemon = True
       server_thread.start()
 
 if __name__ == '__main__':
