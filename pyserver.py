@@ -284,8 +284,8 @@ def game_loop():
 def run():
     print('Starting server...')
 
-    game_thread = threading.Thread(target=game_loop)
-    game_thread.start()
+#     game_thread = threading.Thread(target=game_loop)
+#     game_thread.start()
 
     # Server settings
     with HTTPServer(server_address, RequestHandler) as httpd:
