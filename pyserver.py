@@ -1,6 +1,4 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from concurrent.futures import ThreadPoolExecutor
-import concurrent.futures
 import json
 import time
 import copy
@@ -11,9 +9,6 @@ from enum import Enum
 from urllib.parse import urlparse, parse_qs
 import platform
 import os
-
-
-executor = ThreadPoolExecutor(max_workers=10)
 
 URL = '0.0.0.0'
 is_server = platform.system() == "Linux"
@@ -541,20 +536,14 @@ def game_loop():
 def run():
     print('Starting server...')
 
-    # Use a ThreadPoolExecutor to create threads
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Submit game_loop() to the executor
-        game_future = executor.submit(game_loop)
+    game_thread = threading.Thread(target=game_loop)
+    game_thread.start()
 
-        # Server settings
-        with HTTPServer(server_address, RequestHandler) as httpd:
-            print('Server running at ' + server_address[0])
-
-            # Submit httpd.serve_forever() to the executor
-            server_future = executor.submit(httpd.serve_forever)
-
-            # Wait for both futures to complete
-            concurrent.futures.wait([game_future, server_future])
+    # Server settings
+    with HTTPServer(server_address, RequestHandler) as httpd:
+      print('Server running at ' + server_address[0])
+      server_thread = threading.Thread(target=httpd.serve_forever())
+      server_thread.start()
 
 if __name__ == '__main__':
     run()
