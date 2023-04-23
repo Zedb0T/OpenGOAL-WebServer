@@ -29,7 +29,7 @@ class MyServerThread(threading.Thread):
             self.httpd.shutdown()
 
 
-executor = ThreadPoolExecutor(max_workers=10)
+executor = ThreadPoolExecutor(max_workers=1000)
 
 URL = '0.0.0.0'
 is_server = platform.system() == "Linux"
@@ -554,6 +554,25 @@ def game_loop():
 
       # any clients should then update their own player states accordingly after seeing a game state change here
 
+class ThreadedHTTPServer(HTTPServer):
+    def __init__(self, server_address, RequestHandlerClass):
+        super().__init__(server_address, RequestHandlerClass)
+        self.request_queue_size = 100
+        self.lock = threading.Lock()
+
+    def process_request(self, request, client_address):
+        # Create a new thread to handle the request
+        thread = threading.Thread(target=self.handle_request, args=(request, client_address))
+        thread.start()
+
+    def handle_request(self, request, client_address):
+        with self.lock:
+            # Create a new instance of the RequestHandlerClass
+            self.RequestHandlerClass(request, client_address, self)
+
+            # Process the request
+            self.finish_request(request, client_address)
+            
 def run():
   if __name__ == '__main__':
     print('Starting server...')
