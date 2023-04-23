@@ -11,6 +11,22 @@ from enum import Enum
 from urllib.parse import urlparse, parse_qs
 import platform
 import os
+import threading
+
+class MyServerThread(threading.Thread):
+    def __init__(self, server_address, handler_class):
+        super().__init__()
+        self.server_address = server_address
+        self.handler_class = handler_class
+        self.httpd = None
+
+    def run(self):
+        self.httpd = HTTPServer(self.server_address, self.handler_class)
+        self.httpd.serve_forever()
+
+    def shutdown(self):
+        if self.httpd:
+            self.httpd.shutdown()
 
 
 executor = ThreadPoolExecutor(max_workers=10)
@@ -539,22 +555,20 @@ def game_loop():
       # any clients should then update their own player states accordingly after seeing a game state change here
 
 def run():
+  if __name__ == '__main__':
     print('Starting server...')
 
-    # Use a ThreadPoolExecutor to create threads
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Submit game_loop() to the executor
-        game_future = executor.submit(game_loop)
+    # Start the server in a separate thread
+    server_thread = MyServerThread(server_address, RequestHandler)
+    server_thread.start()
 
-        # Server settings
-        with HTTPServer(server_address, RequestHandler) as httpd:
-            print('Server running at ' + server_address[0])
+    print('Server running at ' + server_address[0])
 
-            # Submit httpd.serve_forever() to the executor
-            server_future = executor.submit(httpd.serve_forever)
+    # Start the game loop
+    game_loop()
 
-            # Wait for both futures to complete
-            concurrent.futures.wait([game_future, server_future])
+    # Stop the server thread when the game loop is done
+    server_thread.shutdown()
 
 if __name__ == '__main__':
-    run()
+  run()
